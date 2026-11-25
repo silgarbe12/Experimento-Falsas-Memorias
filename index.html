@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estudio sobre memoria y reconocimiento</title>
+<style>
+:root{--ink:#202938;--muted:#657184;--line:#e3e8ef;--bg:#f5f7fb;--accent:#3457a5;--accent2:#eaf0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+main{max-width:850px;margin:32px auto;padding:0 16px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:clamp(20px,4vw,36px);box-shadow:0 8px 28px #1e293b0b}
+h1{font-size:clamp(1.5rem,4vw,2.15rem);line-height:1.2;margin:0 0 12px}h2{font-size:1.25rem;margin:0 0 12px}
+p{margin:10px 0}.muted,.small{color:var(--muted)}.small{font-size:.9rem}.field{display:block;margin:18px 0 8px;font-weight:650}
+input[type=email],input[type=text],input[type=number]{width:100%;padding:13px 14px;border:1px solid #cbd3df;border-radius:10px;font:inherit}
+button{border:0;border-radius:10px;background:var(--accent);color:#fff;font:inherit;font-weight:650;padding:12px 18px;cursor:pointer;margin-top:18px}
+button:disabled{opacity:.45;cursor:not-allowed}.secondary{background:#e9edf5;color:var(--ink)}.progress{height:8px;background:#e9edf5;border-radius:20px;overflow:hidden;margin:16px 0 24px}.bar{height:100%;background:var(--accent);width:0;transition:width .2s}
+.meta{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:.92rem}.passage{font-size:1.12rem;line-height:1.8;padding:20px;background:#f8faff;border:1px solid #e5ebf7;border-radius:12px;min-height:180px}
+.choice{display:flex;gap:10px;align-items:flex-start;padding:12px;border:1px solid var(--line);border-radius:10px;margin:9px 0;cursor:pointer}.choice input{margin-top:5px}
+.question{padding:18px 0;border-bottom:1px solid var(--line)}.question:last-child{border-bottom:0}
+iframe{width:100%;aspect-ratio:16/9;border:0;border-radius:12px;background:#111}
+.notice{padding:13px 15px;border-radius:10px;background:#fff8e8;border:1px solid #f0dfb6;color:#624d1e}
+.hidden{display:none!important}.center{text-align:center}.timer{font-size:1.35rem;font-weight:750;font-variant-numeric:tabular-nums}
+footer{text-align:center;color:var(--muted);font-size:.82rem;margin:18px}
+</style>
+</head>
+<body>
+<main>
+<section id="welcome" class="panel">
+<h1>Estudio sobre memoria y reconocimiento de información</h1>
+<p class="muted">Actividad académica · Duración aproximada: 15 minutos</p>
+<p>Gracias por tu interés. La actividad incluye la lectura de fragmentos, una tarea breve de cálculo, la visualización de un vídeo y un cuestionario de memoria.</p>
+<h2>Información y consentimiento</h2>
+<p>Tu participación es voluntaria. Puedes abandonar la actividad en cualquier momento antes de enviar tus respuestas. No hay respuestas buenas o malas en términos personales; responde según lo que recuerdes.</p>
+<p><strong>Datos:</strong> se solicitará tu correo electrónico y se registrarán tus respuestas y el momento de participación. Por tanto, la participación no es anónima. Los datos se utilizarán exclusivamente para la actividad académica indicada por el equipo responsable y el acceso deberá limitarse a las personas autorizadas.</p>
+<p class="notice"><strong>Importante:</strong> antes de abrir el estudio a participantes reales, completa la información del responsable, contacto, base jurídica, plazo de conservación y derechos de protección de datos, y confirma con el profesorado que el procedimiento y el uso de información no revelada hasta el final están autorizados. Este texto es una plantilla académica y no sustituye la revisión de la UGR.</p>
+<label class="field" for="email">Correo electrónico (obligatorio)</label>
+<input id="email" type="email" autocomplete="email" required placeholder="nombre@correo.com">
+<label class="choice"><input id="consent" type="checkbox"><span>He leído la información y acepto participar voluntariamente y que se traten mis datos para la finalidad académica descrita.</span></label>
+<button id="begin" disabled>Comenzar el estudio</button>
+</section>
+
+<section id="reading" class="panel hidden">
+<div class="meta"><span id="partLabel">Fragmento 1 de 20</span><span class="timer" id="readTimer">20 s</span></div>
+<div class="progress"><div class="bar" id="readBar"></div></div>
+<h2>Lee atentamente el siguiente fragmento</h2>
+<div class="passage" id="passage"></div>
+<p class="small">El siguiente fragmento aparecerá automáticamente cuando termine el tiempo. No es posible volver a fragmentos anteriores.</p>
+<button id="nextPart" disabled>Siguiente</button>
+</section>
+
+<section id="math" class="panel hidden">
+<div class="meta"><span>Tarea distractora de cálculo</span><span class="timer" id="mathTimer">02:00</span></div>
+<div class="progress"><div class="bar" id="mathBar"></div></div>
+<h2>Resuelve las siguientes operaciones</h2>
+<p>Durante los próximos dos minutos, resuelve tantas sumas como puedas. Introduce el resultado y pulsa «Comprobar y continuar» para pasar a la siguiente.</p>
+<div class="passage center" style="min-height:100px;display:grid;place-items:center"><strong id="sumText" style="font-size:2rem"></strong></div>
+<label class="field" for="sumAnswer">Resultado</label><input id="sumAnswer" type="number" inputmode="numeric" placeholder="Escribe el resultado">
+<p class="small" id="sumFeedback" aria-live="polite"></p>
+<button id="checkSum">Comprobar y continuar</button>
+</section>
+
+<section id="video" class="panel hidden">
+<div class="meta"><span>Visualización del vídeo</span><span class="timer" id="videoTimer">03:30</span></div>
+<div class="progress"><div class="bar" id="videoBar"></div></div>
+<h2>Visualiza el vídeo completo</h2>
+<p>Reproduce el vídeo y préstale atención. El cuestionario aparecerá cuando termine el tiempo de visualización.</p>
+<iframe src="https://drive.google.com/file/d/1YFHqBdtLPvwEFkfeBh9FhlIGwXUQ80LW/preview" allow="autoplay; fullscreen" allowfullscreen title="Vídeo del estudio"></iframe>
+<p class="small">Si el vídeo no aparece, comprueba que en Google Drive el acceso general esté configurado como «Cualquier persona con el enlace» y que el permiso sea de lector.</p>
+<button id="videoDone" disabled>Continuar al cuestionario</button>
+</section>
+
+<section id="quiz" class="panel hidden">
+<h2>Cuestionario de memoria</h2>
+<p>Responde a las 20 preguntas seleccionando una sola opción en cada una. Si no recuerdas algo, elige la opción que consideres más probable.</p>
+<div id="questions"></div>
+<button id="send">Enviar respuestas</button>
+<p id="sendStatus" class="small" aria-live="polite"></p>
+</section>
+
+<section id="finish" class="panel hidden center">
+<h1>Gracias por participar</h1>
+<p>Has completado la actividad. La página ha enviado la solicitud de registro; el equipo responsable debe comprobar que las respuestas aparecen en la hoja.</p>
+<h2>Información final del estudio</h2>
+<p>En el material se incluyeron algunas diferencias deliberadas entre el texto leído y el vídeo. En concreto, el texto original indicaba tres meses en la capital del Catay, los hermanos Baian y Mingan y cincuenta mil perros. En el vídeo se presentaron, respectivamente, seis meses, Baian y Kublay y treinta mil perros.</p>
+<p>Estas discrepancias se incluyeron para estudiar cómo la información posterior puede influir en el recuerdo. Si tienes dudas sobre el estudio o deseas ejercer tus derechos sobre los datos, contacta con el equipo responsable indicado por tu docente.</p>
+</section>
+<footer>Actividad académica de investigación sobre memoria</footer>
+</main>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPuD5On6cEeOr1dEj87SkFXS_4RAS0T_15KoADK8tCDmIB15g3iAExH5DUwvbTx8E7/exec";
+const paragraphs = [
+"Sabed que mientras el gran Kan reside, los tres meses que he dicho, en la capital del Catay, dispone que en el espacio de sesenta jornadas alrededor de su palacio se dediquen todos a cazar, y que los señores y otras gentes le lleven el mayor número posible de animales silvestres, tales como jabalíes, ciervos, venados, cabras y osos.",
+"Los cazadores que se hallan dentro del espacio de treinta jornadas o más de camino le envían los animales en carretas; los que están a la distancia de sesenta jornadas remiten solo la carne y las pieles, y todo sirve para el ejército. El gran Kan mantiene muchos leopardos y lobos cervales amaestrados para cazar, y leones más grandes que los de Babilonia, de hermoso pelo y excelentes cazadores.",
+"Es cosa verdaderamente notable ver a tan terribles animales llevados a la caza en jaulas, juntamente con un perrillo. Hay también águilas adiestradas en coger lobos, zorros, venados y cabras: las destinadas a los primeros son extraordinariamente grandes, puesto que lo son también los animales que deben cazar.",
+"Ahora hablaré de los perros del gran señor. Entre los magnates de la corte, hay dos hermanos llamados Baian y Mingan que llevan el título de cunici, esto es, guardadores de mastines. Cada uno de los magnates tiene diez mil hombres a sus órdenes, unos vestidos de color azul y otros rojo.",
+"Cada vez que el gran señor sale de casa se visten aquellos el uniforme del color que les corresponde, y de los diez mil hay dos mil de los cuales cada uno conduce un mastín o dos, porque el número de estos es grande.",
+"Los dos hermanos, de quienes he hablado, siguen al gran señor con unos diez mil hombres y cincuenta mil perros, y ambos van cazando a distancia entre sí de una jornada, de modo que no hay animal silvestre que no cojan.",
+"Después que el gran Kan ha residido tres meses en Cambaluc, y cuando llega el mes de marzo, sale en dirección al Mediodía y al Océano, que se halla a distancia de dos jornadas, llevando diez mil halconeros con quinientos gerifaltes y muchos halcones y buitres.",
+"No creáis que estos son los únicos, sino que los divide en tandas de ciento, doscientos y más, y la mayor parte llevan la presa al gran señor.",
+"Cuando va cazando con sus gerifaltes, le acompañan doce mil hombres esparcidos en parejas llamadas toscaor, esto es, guardianes, y cada uno lleva su reclamo para atraer los pájaros.",
+"Cuando el gran señor deja escapar alguna ave, no hay necesidad de perseguirla, pues cae indefectiblemente en poder de los hombres que he dicho. Todas las aves cazadoras que pertenecen al gran señor o a los dignatarios llevan en las patas una tablilla de plata, donde está grabado el nombre del dueño, para que se sepa a quién corresponde la presa.",
+"Si no se conoce el dueño, la caza es entregada a un noble llamado bulargusi o custodio de las cosas sin propietario. Cuando se encuentra un caballo, una espada o un ave cuyo dueño se ignora, la ponen en manos de dicho noble, a fin de que la guarde.",
+"El que se apropia un objeto que no es suyo y no lo devuelve es tenido por ladrón. El bulargusi se establece desplegando su bandera en una eminencia, para que todo el mundo sepa dónde está: con este recurso todos los objetos perdidos son devueltos a su dueño.",
+"Yendo el gran señor en la dirección que he dicho y contemplando las hermosas vistas que se presentan, va sobre cuatro elefantes que transportan un palanquín de ricas maderas, preciosamente tapizado con paños de oro batido por dentro, y por fuera cubierto con pieles de leones.",
+"En el interior se alberga el gran Kan con doce gerifaltes de los mejores y varios nobles para distraerle. Cuando los magnates que van cabalgando a los lados le advierten que pasan grullas, hace abrir el techo del palanquín y suelta el gerifalte que mejor le parece; se tiende de nuevo en los cojines y desde allí contempla con mucho regocijo los lances de la caza.",
+"Cuando llega el gran Kan a un sitio que llaman Cazar Modum encuentra ya los pabellones preparados para sí, sus hijos, magnates y mujeres; pabellones o tiendas muy ricos. El suyo de corte es tan grande que puede contener mil caballeros, y en él moran los dignatarios y otras gentes.",
+"La puerta se halla hacia el Mediodía. Junto a esta tienda y hacia la parte del Poniente hay otra particular suya; cuando quiere hablar con alguno, le hace entrar en ella. Después del gran salón se entra en el hermoso aposento donde duerme; hay también otros, pero separados de este.",
+"Cada uno de los dos primeros salones está sostenido por columnas de madera olorosa muy bien labradas y cubiertas de pieles de leones rayadas de negro, rojo y blanco; tan bien unidas que ni el viento ni la lluvia pueden penetrar. El interior se lleva tapizado de pieles de armiño, cibelina y plumas de gran valor.",
+"Una piel de cibelina suficiente para traje de un hombre vale, si es de buena calidad, dos mil monedas de oro; comúnmente vale mil, y los tártaros la llaman la reina de las pieles; es del tamaño de una fuina. El aposento donde duerme el gran Kan se halla cubierto de la misma manera en el interior y en el exterior.",
+"Las cuerdas con que sostienen los pabellones son de seda: tanto cuestan estos albergues que un reyezuelo no podría tenerlos. Alrededor campean las demás tiendas, muy bien ordenadas. Las concubinas del gran señor las tienen también de gran precio, y no faltan para los gerifaltes, halcones y otras aves. Allí concurren todos, y allí tiene el gran Kan sus médicos, sus astrónomos, sus halconeros y otros ministros como si estuviese en su capital.",
+"En aquel punto reside hasta que llega la Pascua de Resurrección, y en todo el tiempo no hace más que cazar toda clase de aves. Ni comerciantes, ni artesanos, ni labradores pueden tener aves cazadoras a la distancia de veinte jornadas de donde se asienta el gran señor; pero en las otras provincias y tierras pueden cazar como quieran. En todos los países que están bajo su dominio, nadie, por elevada que sea su jerarquía, tiene permiso para cazar liebres, cabras, venados, ciervos y otros animales que crían de marzo a octubre, pues de lo contrario incurren en graves penas."
+];
+const quiz = [
+["¿Cuánto tiempo permanecía el Gran Kan en la capital del Catay?",["Dos meses","Seis meses","Tres meses","Cuatro meses"],2],
+["¿Qué enviaban los cazadores que se encontraban a mayor distancia del palacio?",["Los animales vivos en carretas","Únicamente las pieles","La carne y las pieles","Los animales domesticados"],2],
+["¿Qué animales amaestrados utilizaba el Gran Kan para cazar?",["Leopardos, lobos cervales y leones","Tigres, osos y zorros","Lobos, caballos y águilas","Leones, ciervos y perros"],0],
+["¿Cómo se llamaban los dos hermanos encargados de los mastines?",["Baian y Mingan","Baian y Kublay","Mingan y Cambaluc","Baian y Cazar"],0],
+["¿De qué colores eran los uniformes que vestían los hombres al servicio de los magnates?",["Verde y rojo","Azul y blanco","Negro y rojo","Azul y rojo"],3],
+["¿Con cuántos perros seguían los dos hermanos al Gran Kan?",["Diez mil perros","Cuarenta mil perros","Treinta mil perros","Cincuenta mil perros"],3],
+["¿En qué mes emprendía el Gran Kan su expedición hacia el sur?",["Enero","Marzo","Junio","Septiembre"],1],
+["¿Cómo organizaba el Gran Kan a sus aves de caza?",["En grupos de cien, doscientos o más","En parejas de diez aves","En grupos de cincuenta exclusivamente","En grupos de quinientas aves"],0],
+["¿Cómo se llamaban los hombres que acompañaban al Gran Kan en parejas para atraer a los pájaros?",["Cunici","Bulargusi","Halconeros","Toscaor"],3],
+["¿Qué llevaban las aves cazadoras en las patas para identificar a su propietario?",["Una cinta de seda","Una tablilla de plata","Una anilla de oro","Una pequeña campana"],1],
+["¿Quién era el encargado de custodiar los objetos cuyo propietario se desconocía?",["El bulargusi","El cunici","El halconero principal","El guardián de mastines"],0],
+["¿Qué hacía el bulargusi para indicar dónde se encontraban los objetos perdidos?",["Enviaba mensajeros a la capital","Colocaba una tablilla en el palacio","Desplegaba su bandera en una eminencia","Encendía una hoguera"],2],
+["¿Sobre qué animales se transportaba el palanquín del Gran Kan?",["Cuatro caballos","Dos elefantes","Seis elefantes","Cuatro elefantes"],3],
+["¿Qué hacía el Gran Kan cuando sus acompañantes le advertían de la presencia de grullas?",["Ordenaba detener la expedición","Abría el techo del palanquín y soltaba un gerifalte","Bajaba del palanquín para perseguirlas","Mandaba a los perros a capturarlas"],1],
+["¿Cuántos caballeros podía contener el pabellón principal del Gran Kan?",["Mil caballeros","Quinientos caballeros","Dos mil caballeros","Cien caballeros"],0],
+["¿Hacia qué punto cardinal estaba orientada la puerta de la tienda principal?",["Al norte","Al poniente","Al mediodía","Al oriente"],2],
+["¿Con qué materiales estaban decorados los salones del pabellón?",["Pieles de oso y columnas de piedra","Pieles de león y columnas de madera olorosa","Pieles de tigre y columnas de oro","Seda y columnas de mármol"],1],
+["¿Cuánto podía llegar a costar una piel de cibelina de buena calidad?",["Mil monedas de oro","Tres mil monedas de oro","Quinientas monedas de oro","Dos mil monedas de oro"],3],
+["¿De qué material estaban hechas las cuerdas que sostenían los pabellones?",["De seda","De cuero","De algodón","De lana"],0],
+["¿Durante qué periodo estaba prohibido cazar determinados animales en los territorios del Gran Kan?",["De enero a junio","De marzo a octubre","De abril a diciembre","De septiembre a febrero"],1]
+];
+let participantEmail="",part=0,readInterval=null,mathInterval=null,videoInterval=null,mathRemaining=120,videoRemaining=210,readRemaining=20,mathCount=0,currentSum=null,answers={};
+const sections=["welcome","reading","math","video","quiz","finish"];
+function show(id){sections.forEach(s=>document.getElementById(s).classList.toggle("hidden",s!==id));window.scrollTo(0,0)}
+document.getElementById("email").addEventListener("input",validateStart);
+document.getElementById("consent").addEventListener("change",validateStart);
+function validateStart(){const e=document.getElementById("email").value.trim();document.getElementById("begin").disabled=!(document.getElementById("consent").checked&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))}
+document.getElementById("begin").onclick=()=>{participantEmail=document.getElementById("email").value.trim();show("reading");renderPart();};
+function renderPart(){readRemaining=20;document.getElementById("partLabel").textContent=`Fragmento ${part+1} de 20`;document.getElementById("passage").textContent=paragraphs[part];document.getElementById("nextPart").disabled=true;tickRead();clearInterval(readInterval);readInterval=setInterval(tickRead,1000)}
+function tickRead(){document.getElementById("readTimer").textContent=readRemaining+" s";document.getElementById("readBar").style.width=((20-readRemaining)/20*100)+"%";if(readRemaining<=0){clearInterval(readInterval);document.getElementById("nextPart").disabled=false;document.getElementById("readTimer").textContent="Completado";return}readRemaining--}
+document.getElementById("nextPart").onclick=()=>{part++;if(part<20)renderPart();else startMath()};
+function newSum(){const a=120+Math.floor(Math.random()*780),b=110+Math.floor(Math.random()*790),c=Math.random()>.55?100+Math.floor(Math.random()*500):0;currentSum={a,b,c,answer:a+b+c};document.getElementById("sumText").textContent=c?`${a} + ${b} + ${c} = ?`:`${a} + ${b} = ?`;document.getElementById("sumAnswer").value="";document.getElementById("sumFeedback").textContent="";document.getElementById("sumAnswer").focus()}
+function startMath(){show("math");mathRemaining=120;mathCount=0;newSum();document.getElementById("checkSum").disabled=false;mathInterval=setInterval(()=>{mathRemaining--;document.getElementById("mathTimer").textContent=`${String(Math.floor(mathRemaining/60)).padStart(2,"0")}:${String(mathRemaining%60).padStart(2,"0")}`;document.getElementById("mathBar").style.width=((120-mathRemaining)/120*100)+"%";if(mathRemaining<=0){clearInterval(mathInterval);startVideo()}},1000)}
+document.getElementById("checkSum").onclick=()=>{const val=Number(document.getElementById("sumAnswer").value);if(document.getElementById("sumAnswer").value.trim()===""){document.getElementById("sumFeedback").textContent="Introduce un resultado para continuar.";return}if(val===currentSum.answer)mathCount++;newSum()};
+function startVideo(){show("video");videoRemaining=210;document.getElementById("videoDone").disabled=true;videoInterval=setInterval(()=>{videoRemaining--;document.getElementById("videoTimer").textContent=`${String(Math.floor(videoRemaining/60)).padStart(2,"0")}:${String(videoRemaining%60).padStart(2,"0")}`;document.getElementById("videoBar").style.width=((210-videoRemaining)/210*100)+"%";if(videoRemaining<=0){clearInterval(videoInterval);document.getElementById("videoDone").disabled=false;document.getElementById("videoTimer").textContent="Completado"}},1000)}
+document.getElementById("videoDone").onclick=()=>{renderQuiz();show("quiz")};
+function renderQuiz(){const root=document.getElementById("questions");root.innerHTML="";quiz.forEach((q,i)=>{const d=document.createElement("div");d.className="question";const h=document.createElement("p");h.innerHTML=`<strong>${i+1}. ${q[0]}</strong>`;d.appendChild(h);q[1].forEach((opt,j)=>{const l=document.createElement("label");l.className="choice";const inp=document.createElement("input");inp.type="radio";inp.name="q"+i;inp.value=j;l.appendChild(inp);const span=document.createElement("span");span.textContent=String.fromCharCode(65+j)+") "+opt;l.appendChild(span);d.appendChild(l)});root.appendChild(d)})}
+document.getElementById("send").onclick=async()=>{const btn=document.getElementById("send");const selected={};let unanswered=[];quiz.forEach((q,i)=>{const v=document.querySelector(`input[name="q${i}"]:checked`);if(v)selected["pregunta"+(i+1)]=Number(v.value);else unanswered.push(i+1)});if(unanswered.length){document.getElementById("sendStatus").textContent="Te faltan por responder las preguntas: "+unanswered.join(", ")+". Revisa el cuestionario.";return}
+btn.disabled=true;document.getElementById("sendStatus").textContent="Enviando respuestas…";
+const payload={participantId:"FM-"+Date.now(),email:participantEmail,submittedAt:new Date().toISOString(),answers:selected,mathCorrect:mathCount,study:"Cazas imperiales"};
+try{await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:new URLSearchParams({payload:JSON.stringify(payload)})});document.getElementById("sendStatus").textContent="Solicitud de envío enviada. La página no puede verificar la recepción; el equipo debe comprobar la hoja de respuestas.";show("finish")}
+catch(err){document.getElementById("sendStatus").textContent="No se pudo confirmar el envío. Comprueba la conexión e inténtalo de nuevo.";btn.disabled=false}
+};
+</script>
+</body>
+</html>
