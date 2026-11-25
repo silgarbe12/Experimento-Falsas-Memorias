@@ -43,7 +43,6 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;margin:18px}
 <h2>Lee atentamente el siguiente fragmento</h2>
 <div class="passage" id="passage"></div>
 <p class="small">El siguiente fragmento aparecerá automáticamente cuando termine el tiempo. No es posible volver a fragmentos anteriores.</p>
-<button id="nextPart" disabled>Siguiente</button>
 </section>
 
 <section id="math" class="panel hidden">
@@ -138,9 +137,32 @@ document.getElementById("email").addEventListener("input",validateStart);
 document.getElementById("consent").addEventListener("change",validateStart);
 function validateStart(){const e=document.getElementById("email").value.trim();document.getElementById("begin").disabled=!(document.getElementById("consent").checked&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e))}
 document.getElementById("begin").onclick=()=>{participantEmail=document.getElementById("email").value.trim();show("reading");renderPart();};
-function renderPart(){readRemaining=20;document.getElementById("partLabel").textContent=`Fragmento ${part+1} de 20`;document.getElementById("passage").textContent=paragraphs[part];document.getElementById("nextPart").disabled=true;tickRead();clearInterval(readInterval);readInterval=setInterval(tickRead,1000)}
-function tickRead(){document.getElementById("readTimer").textContent=readRemaining+" s";document.getElementById("readBar").style.width=((20-readRemaining)/20*100)+"%";if(readRemaining<=0){clearInterval(readInterval);document.getElementById("nextPart").disabled=false;document.getElementById("readTimer").textContent="Completado";return}readRemaining--}
-document.getElementById("nextPart").onclick=()=>{part++;if(part<20)renderPart();else startMath()};
+function renderPart(){
+  clearInterval(readInterval);
+  readRemaining=20;
+  document.getElementById("partLabel").textContent=`Fragmento ${part+1} de 20`;
+  document.getElementById("passage").textContent=paragraphs[part];
+  document.getElementById("readTimer").textContent="20 s";
+  document.getElementById("readBar").style.width="0%";
+  readInterval=setInterval(tickRead,1000);
+}
+
+function tickRead(){
+  readRemaining--;
+  document.getElementById("readTimer").textContent=readRemaining+" s";
+  document.getElementById("readBar").style.width=((20-readRemaining)/20*100)+"%";
+
+  if(readRemaining<=0){
+    clearInterval(readInterval);
+    if(part<paragraphs.length-1){
+      part++;
+      renderPart();
+    }else{
+      document.getElementById("readTimer").textContent="Completado";
+      startMath();
+    }
+  }
+}
 function newSum(){const a=120+Math.floor(Math.random()*780),b=110+Math.floor(Math.random()*790),c=Math.random()>.55?100+Math.floor(Math.random()*500):0;currentSum={a,b,c,answer:a+b+c};document.getElementById("sumText").textContent=c?`${a} + ${b} + ${c} = ?`:`${a} + ${b} = ?`;document.getElementById("sumAnswer").value="";document.getElementById("sumFeedback").textContent="";document.getElementById("sumAnswer").focus()}
 function startMath(){show("math");mathRemaining=120;mathCount=0;newSum();document.getElementById("checkSum").disabled=false;mathInterval=setInterval(()=>{mathRemaining--;document.getElementById("mathTimer").textContent=`${String(Math.floor(mathRemaining/60)).padStart(2,"0")}:${String(mathRemaining%60).padStart(2,"0")}`;document.getElementById("mathBar").style.width=((120-mathRemaining)/120*100)+"%";if(mathRemaining<=0){clearInterval(mathInterval);startVideo()}},1000)}
 document.getElementById("checkSum").onclick=()=>{const val=Number(document.getElementById("sumAnswer").value);if(document.getElementById("sumAnswer").value.trim()===""){document.getElementById("sumFeedback").textContent="Introduce un resultado para continuar.";return}if(val===currentSum.answer)mathCount++;newSum()};
